@@ -1,0 +1,66 @@
+buildscript {
+    ext {
+        springBootVersion = '1.2.3.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") 
+        classpath("io.spring.gradle:dependency-management-plugin:0.5.0.RELEASE")
+
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot' 
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'scala'
+
+jar {
+    baseName = 'spring-boot-akka-java'
+    version = '0.0.1-SNAPSHOT'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile("org.springframework.boot:spring-boot-starter-aop")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("com.jayway.restassured:rest-assured:2.4.1")
+    compile("org.apache.httpcomponents:httpcore:4.4.1")
+    compile("org.scala-lang:scala-library:2.11.6")
+    compile("org.springframework.boot:spring-boot-starter-web")
+    runtime("mysql:mysql-connector-java")
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+
+}
+
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.useAnt = false
+}
+
+dependencies {
+    compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.3.10'
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.6'
+}
+
+
+eclipse {
+    classpath {
+         containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+         containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
