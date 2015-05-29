@@ -57,4 +57,58 @@ The TaskServiceImpl class inside package "com.example.service", is responsible f
         }
     }
 
-more details coming ...
+The ActorSystem is created from a configuration file "application.conf" residing in the "resources" folder.
+
+    TaskSystem{
+	akka{
+		actor{
+			deployment {
+				  /TaskRouter {
+				    router = smallest-mailbox-pool
+				    nr-of-instances = 4
+				  }
+	  		}
+      }
+	}
+}
+
+The router responsible for routing tasks to the actors can now be created as provided below.
+
+    ActorRef taskRouter = system.actorOf(
+                TaskActor.props(taskRepository).withRouter(new FromConfig()),
+                "TaskRouter")
+                
+I wanted to have access to the "TaskRepository" (created earlier) from the Actors. This "TaskRepository" was passed as a constructor arguement while creating the actor. This is where I have some doubts about its side effects, because, I did not find anyone creating Actors like this before. Nevertheless, it worked as of now.
+
+    @Scope("prototype")
+    public class TaskActor extends UntypedActor{
+
+    private TaskRepository taskRepository;
+
+    public static Props props(final TaskRepository taskRepository) {
+        return Props.create(new Creator<TaskActor>() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public TaskActor create() throws Exception {
+                return new TaskActor(taskRepository);
+            }
+        });
+    }
+
+    public TaskActor(TaskRepository taskRepository){
+        this.taskRepository = taskRepository;
+    }
+
+
+    @Override
+    @Transactional
+    public void onReceive(Object message) throws Exception {
+
+        Task task = (Task) message;
+        System.out.println(task.getName());
+        taskRepository.save(task);
+
+    }
+
+    }
+
